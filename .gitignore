@@ -1,0 +1,9 @@
+.DS_Store
+*.log
+*.tmp
+*.swp
+terraform/.terraform/
+terraform/**/.terraform/
+terraform/**/*.tfstate
+terraform/**/*.tfstate.*
+terraform/**/crash.log
