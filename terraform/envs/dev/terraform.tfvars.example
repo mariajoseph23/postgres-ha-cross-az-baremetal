@@ -1,0 +1,4 @@
+# Copy to terraform.tfvars and set your public IP as /32
+# admin_cidr = "YOUR_PUBLIC_IP/32"
+
+admin_cidr = "108.65.234.217/32"
