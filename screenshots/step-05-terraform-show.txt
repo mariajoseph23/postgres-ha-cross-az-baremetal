@@ -1,0 +1,530 @@
+# data.aws_availability_zones.available:
+data "aws_availability_zones" "available" {
+    group_names = [
+        "us-east-1-zg-1",
+    ]
+    id          = "us-east-1"
+    names       = [
+        "us-east-1a",
+        "us-east-1b",
+        "us-east-1c",
+        "us-east-1d",
+        "us-east-1e",
+        "us-east-1f",
+    ]
+    state       = "available"
+    zone_ids    = [
+        "use1-az2",
+        "use1-az4",
+        "use1-az6",
+        "use1-az1",
+        "use1-az3",
+        "use1-az5",
+    ]
+}
+
+# aws_internet_gateway.this:
+resource "aws_internet_gateway" "this" {
+    arn      = "arn:aws:ec2:us-east-1:861276098560:internet-gateway/igw-01a656dff3af9264b"
+    id       = "igw-01a656dff3af9264b"
+    owner_id = "861276098560"
+    tags     = {
+        "Name" = "postgres-ha-cross-az-baremetal-igw"
+    }
+    tags_all = {
+        "Environment" = "dev"
+        "ManagedBy"   = "terraform"
+        "Name"        = "postgres-ha-cross-az-baremetal-igw"
+        "Owner"       = "maikbleu"
+        "Project"     = "postgres-ha-cross-az-baremetal"
+    }
+    vpc_id   = "vpc-047975981e2f7654a"
+}
+
+# aws_route_table.public:
+resource "aws_route_table" "public" {
+    arn              = "arn:aws:ec2:us-east-1:861276098560:route-table/rtb-08ff3d892c315e4de"
+    id               = "rtb-08ff3d892c315e4de"
+    owner_id         = "861276098560"
+    propagating_vgws = []
+    route            = [
+        {
+            carrier_gateway_id         = null
+            cidr_block                 = "0.0.0.0/0"
+            core_network_arn           = null
+            destination_prefix_list_id = null
+            egress_only_gateway_id     = null
+            gateway_id                 = "igw-01a656dff3af9264b"
+            ipv6_cidr_block            = null
+            local_gateway_id           = null
+            nat_gateway_id             = null
+            network_interface_id       = null
+            transit_gateway_id         = null
+            vpc_endpoint_id            = null
+            vpc_peering_connection_id  = null
+        },
+    ]
+    tags             = {
+        "Name" = "postgres-ha-cross-az-baremetal-public-rt"
+    }
+    tags_all         = {
+        "Environment" = "dev"
+        "ManagedBy"   = "terraform"
+        "Name"        = "postgres-ha-cross-az-baremetal-public-rt"
+        "Owner"       = "maikbleu"
+        "Project"     = "postgres-ha-cross-az-baremetal"
+    }
+    vpc_id           = "vpc-047975981e2f7654a"
+}
+
+# aws_route_table_association.public[0]:
+resource "aws_route_table_association" "public" {
+    gateway_id     = null
+    id             = "rtbassoc-0f659d7bac1cf8349"
+    route_table_id = "rtb-08ff3d892c315e4de"
+    subnet_id      = "subnet-074eae853f6823117"
+}
+
+# aws_route_table_association.public[1]:
+resource "aws_route_table_association" "public" {
+    gateway_id     = null
+    id             = "rtbassoc-0b9c92e079ae89728"
+    route_table_id = "rtb-08ff3d892c315e4de"
+    subnet_id      = "subnet-04c209a8d526b1ef2"
+}
+
+# aws_route_table_association.public[2]:
+resource "aws_route_table_association" "public" {
+    gateway_id     = null
+    id             = "rtbassoc-0715d7ffbd9325678"
+    route_table_id = "rtb-08ff3d892c315e4de"
+    subnet_id      = "subnet-0d436619243ca95bf"
+}
+
+# aws_security_group.etcd:
+resource "aws_security_group" "etcd" {
+    arn                    = "arn:aws:ec2:us-east-1:861276098560:security-group/sg-07557118d5a7be739"
+    description            = "etcd cluster nodes"
+    egress                 = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = "Allow all outbound"
+            from_port        = 0
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "-1"
+            security_groups  = []
+            self             = false
+            to_port          = 0
+        },
+    ]
+    id                     = "sg-07557118d5a7be739"
+    ingress                = [
+        {
+            cidr_blocks      = [
+                "108.65.234.217/32",
+            ]
+            description      = "SSH from admin"
+            from_port        = 22
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 22
+        },
+        {
+            cidr_blocks      = []
+            description      = "etcd client from Postgres nodes (Patroni)"
+            from_port        = 2379
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = [
+                "sg-086d23354318c3718",
+            ]
+            self             = false
+            to_port          = 2379
+        },
+    ]
+    name                   = "postgres-ha-cross-az-baremetal-sg-etcd"
+    name_prefix            = null
+    owner_id               = "861276098560"
+    revoke_rules_on_delete = false
+    tags                   = {
+        "Name" = "postgres-ha-cross-az-baremetal-sg-etcd"
+    }
+    tags_all               = {
+        "Environment" = "dev"
+        "ManagedBy"   = "terraform"
+        "Name"        = "postgres-ha-cross-az-baremetal-sg-etcd"
+        "Owner"       = "maikbleu"
+        "Project"     = "postgres-ha-cross-az-baremetal"
+    }
+    vpc_id                 = "vpc-047975981e2f7654a"
+}
+
+# aws_security_group.haproxy:
+resource "aws_security_group" "haproxy" {
+    arn                    = "arn:aws:ec2:us-east-1:861276098560:security-group/sg-05e3564de2232ed4c"
+    description            = "HAProxy nodes behind NLB"
+    egress                 = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = "Allow all outbound"
+            from_port        = 0
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "-1"
+            security_groups  = []
+            self             = false
+            to_port          = 0
+        },
+    ]
+    id                     = "sg-05e3564de2232ed4c"
+    ingress                = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = "Client traffic to HAProxy (NLB target)"
+            from_port        = 5432
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 5432
+        },
+        {
+            cidr_blocks      = [
+                "108.65.234.217/32",
+            ]
+            description      = "HAProxy stats (optional)"
+            from_port        = 8404
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 8404
+        },
+        {
+            cidr_blocks      = [
+                "108.65.234.217/32",
+            ]
+            description      = "SSH from admin"
+            from_port        = 22
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 22
+        },
+    ]
+    name                   = "postgres-ha-cross-az-baremetal-sg-haproxy"
+    name_prefix            = null
+    owner_id               = "861276098560"
+    revoke_rules_on_delete = false
+    tags                   = {
+        "Name" = "postgres-ha-cross-az-baremetal-sg-haproxy"
+    }
+    tags_all               = {
+        "Environment" = "dev"
+        "ManagedBy"   = "terraform"
+        "Name"        = "postgres-ha-cross-az-baremetal-sg-haproxy"
+        "Owner"       = "maikbleu"
+        "Project"     = "postgres-ha-cross-az-baremetal"
+    }
+    vpc_id                 = "vpc-047975981e2f7654a"
+}
+
+# aws_security_group.postgres:
+resource "aws_security_group" "postgres" {
+    arn                    = "arn:aws:ec2:us-east-1:861276098560:security-group/sg-086d23354318c3718"
+    description            = "PostgreSQL + Patroni nodes"
+    egress                 = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = "Allow all outbound"
+            from_port        = 0
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "-1"
+            security_groups  = []
+            self             = false
+            to_port          = 0
+        },
+    ]
+    id                     = "sg-086d23354318c3718"
+    ingress                = [
+        {
+            cidr_blocks      = [
+                "108.65.234.217/32",
+            ]
+            description      = "Patroni REST API from admin"
+            from_port        = 8008
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 8008
+        },
+        {
+            cidr_blocks      = [
+                "108.65.234.217/32",
+            ]
+            description      = "PostgreSQL from admin (direct testing)"
+            from_port        = 5432
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 5432
+        },
+        {
+            cidr_blocks      = [
+                "108.65.234.217/32",
+            ]
+            description      = "SSH from admin"
+            from_port        = 22
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 22
+        },
+        {
+            cidr_blocks      = []
+            description      = "Patroni REST API from HAProxy"
+            from_port        = 8008
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = [
+                "sg-05e3564de2232ed4c",
+            ]
+            self             = false
+            to_port          = 8008
+        },
+        {
+            cidr_blocks      = []
+            description      = "PostgreSQL from HAProxy"
+            from_port        = 5432
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = [
+                "sg-05e3564de2232ed4c",
+            ]
+            self             = false
+            to_port          = 5432
+        },
+    ]
+    name                   = "postgres-ha-cross-az-baremetal-sg-postgres"
+    name_prefix            = null
+    owner_id               = "861276098560"
+    revoke_rules_on_delete = false
+    tags                   = {
+        "Name" = "postgres-ha-cross-az-baremetal-sg-postgres"
+    }
+    tags_all               = {
+        "Environment" = "dev"
+        "ManagedBy"   = "terraform"
+        "Name"        = "postgres-ha-cross-az-baremetal-sg-postgres"
+        "Owner"       = "maikbleu"
+        "Project"     = "postgres-ha-cross-az-baremetal"
+    }
+    vpc_id                 = "vpc-047975981e2f7654a"
+}
+
+# aws_security_group_rule.etcd_client_self:
+resource "aws_security_group_rule" "etcd_client_self" {
+    description              = "etcd client traffic within etcd cluster"
+    from_port                = 2379
+    id                       = "sgrule-3222584460"
+    protocol                 = "tcp"
+    security_group_id        = "sg-07557118d5a7be739"
+    security_group_rule_id   = "sgr-06b8fc093e75c2492"
+    self                     = false
+    source_security_group_id = "sg-07557118d5a7be739"
+    to_port                  = 2379
+    type                     = "ingress"
+}
+
+# aws_security_group_rule.etcd_peer_self:
+resource "aws_security_group_rule" "etcd_peer_self" {
+    description              = "etcd peer traffic within etcd cluster"
+    from_port                = 2380
+    id                       = "sgrule-3505043332"
+    protocol                 = "tcp"
+    security_group_id        = "sg-07557118d5a7be739"
+    security_group_rule_id   = "sgr-0a1bb522200d3ee9c"
+    self                     = false
+    source_security_group_id = "sg-07557118d5a7be739"
+    to_port                  = 2380
+    type                     = "ingress"
+}
+
+# aws_subnet.public[0]:
+resource "aws_subnet" "public" {
+    arn                                            = "arn:aws:ec2:us-east-1:861276098560:subnet/subnet-074eae853f6823117"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-1a"
+    availability_zone_id                           = "use1-az2"
+    cidr_block                                     = "10.20.10.0/24"
+    customer_owned_ipv4_pool                       = null
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-074eae853f6823117"
+    ipv6_cidr_block                                = null
+    ipv6_cidr_block_association_id                 = null
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = true
+    outpost_arn                                    = null
+    owner_id                                       = "861276098560"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "Name" = "postgres-ha-cross-az-baremetal-public-1"
+    }
+    tags_all                                       = {
+        "Environment" = "dev"
+        "ManagedBy"   = "terraform"
+        "Name"        = "postgres-ha-cross-az-baremetal-public-1"
+        "Owner"       = "maikbleu"
+        "Project"     = "postgres-ha-cross-az-baremetal"
+    }
+    vpc_id                                         = "vpc-047975981e2f7654a"
+}
+
+# aws_subnet.public[1]:
+resource "aws_subnet" "public" {
+    arn                                            = "arn:aws:ec2:us-east-1:861276098560:subnet/subnet-04c209a8d526b1ef2"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-1b"
+    availability_zone_id                           = "use1-az4"
+    cidr_block                                     = "10.20.20.0/24"
+    customer_owned_ipv4_pool                       = null
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-04c209a8d526b1ef2"
+    ipv6_cidr_block                                = null
+    ipv6_cidr_block_association_id                 = null
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = true
+    outpost_arn                                    = null
+    owner_id                                       = "861276098560"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "Name" = "postgres-ha-cross-az-baremetal-public-2"
+    }
+    tags_all                                       = {
+        "Environment" = "dev"
+        "ManagedBy"   = "terraform"
+        "Name"        = "postgres-ha-cross-az-baremetal-public-2"
+        "Owner"       = "maikbleu"
+        "Project"     = "postgres-ha-cross-az-baremetal"
+    }
+    vpc_id                                         = "vpc-047975981e2f7654a"
+}
+
+# aws_subnet.public[2]:
+resource "aws_subnet" "public" {
+    arn                                            = "arn:aws:ec2:us-east-1:861276098560:subnet/subnet-0d436619243ca95bf"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-1c"
+    availability_zone_id                           = "use1-az6"
+    cidr_block                                     = "10.20.30.0/24"
+    customer_owned_ipv4_pool                       = null
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-0d436619243ca95bf"
+    ipv6_cidr_block                                = null
+    ipv6_cidr_block_association_id                 = null
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = true
+    outpost_arn                                    = null
+    owner_id                                       = "861276098560"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "Name" = "postgres-ha-cross-az-baremetal-public-3"
+    }
+    tags_all                                       = {
+        "Environment" = "dev"
+        "ManagedBy"   = "terraform"
+        "Name"        = "postgres-ha-cross-az-baremetal-public-3"
+        "Owner"       = "maikbleu"
+        "Project"     = "postgres-ha-cross-az-baremetal"
+    }
+    vpc_id                                         = "vpc-047975981e2f7654a"
+}
+
+# aws_vpc.this:
+resource "aws_vpc" "this" {
+    arn                                  = "arn:aws:ec2:us-east-1:861276098560:vpc/vpc-047975981e2f7654a"
+    assign_generated_ipv6_cidr_block     = false
+    cidr_block                           = "10.20.0.0/16"
+    default_network_acl_id               = "acl-02064414929f2b342"
+    default_route_table_id               = "rtb-0a927922e2347eb2e"
+    default_security_group_id            = "sg-004f1f9ae770414e5"
+    dhcp_options_id                      = "dopt-0222ed848b55ab4d0"
+    enable_dns_hostnames                 = true
+    enable_dns_support                   = true
+    enable_network_address_usage_metrics = false
+    id                                   = "vpc-047975981e2f7654a"
+    instance_tenancy                     = "default"
+    ipv6_association_id                  = null
+    ipv6_cidr_block                      = null
+    ipv6_cidr_block_network_border_group = null
+    ipv6_ipam_pool_id                    = null
+    ipv6_netmask_length                  = 0
+    main_route_table_id                  = "rtb-0a927922e2347eb2e"
+    owner_id                             = "861276098560"
+    tags                                 = {
+        "Name" = "postgres-ha-cross-az-baremetal-vpc"
+    }
+    tags_all                             = {
+        "Environment" = "dev"
+        "ManagedBy"   = "terraform"
+        "Name"        = "postgres-ha-cross-az-baremetal-vpc"
+        "Owner"       = "maikbleu"
+        "Project"     = "postgres-ha-cross-az-baremetal"
+    }
+}
+
+
+Outputs:
+
+availability_zones = [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c",
+]
+public_subnet_ids = [
+    "subnet-074eae853f6823117",
+    "subnet-04c209a8d526b1ef2",
+    "subnet-0d436619243ca95bf",
+]
+sg_etcd_id = "sg-07557118d5a7be739"
+sg_haproxy_id = "sg-05e3564de2232ed4c"
+sg_postgres_id = "sg-086d23354318c3718"
+vpc_id = "vpc-047975981e2f7654a"

@@ -1,0 +1,14 @@
+availability_zones = tolist([
+  "us-east-1a",
+  "us-east-1b",
+  "us-east-1c",
+])
+public_subnet_ids = [
+  "subnet-074eae853f6823117",
+  "subnet-04c209a8d526b1ef2",
+  "subnet-0d436619243ca95bf",
+]
+sg_etcd_id = "sg-07557118d5a7be739"
+sg_haproxy_id = "sg-05e3564de2232ed4c"
+sg_postgres_id = "sg-086d23354318c3718"
+vpc_id = "vpc-047975981e2f7654a"
