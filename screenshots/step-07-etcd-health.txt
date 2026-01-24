@@ -1,0 +1,9 @@
+etcdctl endpoint health:
+http://10.20.20.144:2379 is healthy: successfully committed proposal: took = 5.867283ms
+http://10.20.30.15:2379 is healthy: successfully committed proposal: took = 6.030248ms
+http://10.20.10.235:2379 is healthy: successfully committed proposal: took = 8.09414ms
+
+etcdctl member list:
+22ccdf1ddb56570, started, etcd-1, http://10.20.10.235:2380, http://10.20.10.235:2379
+7630fd64b56f5341, started, etcd-2, http://10.20.20.144:2380, http://10.20.20.144:2379
+88749ab0897b83a3, started, etcd-3, http://10.20.30.15:2380, http://10.20.30.15:2379
