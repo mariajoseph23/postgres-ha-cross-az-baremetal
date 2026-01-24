@@ -18,3 +18,14 @@ terraform plan
 terraform apply
 terraform output
 
+# Step 6: Provision EC2 nodes (Terraform)
+
+This step provisions compute nodes only (no software install yet):
+- 3 etcd nodes
+- 3 PostgreSQL nodes
+- 2 HAProxy nodes
+
+Evidence captured:
+- screenshots/step-06-terraform-outputs.txt
+- screenshots/step-06-ec2-inventory.txt
+
