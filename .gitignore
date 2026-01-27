@@ -2,11 +2,16 @@
 *.log
 *.tmp
 *.swp
-terraform/.terraform/
-terraform/**/.terraform/
-terraform/**/*.tfstate
-terraform/**/*.tfstate.*
-terraform/**/crash.log
+
+# Terraform local artifacts
 .terraform/
+**/.terraform/
 *.tfvars
+*.tfvars.*
+*.tfstate
+*.tfstate.*
+crash.log
+terraform/envs/dev/ec2.tf
+terraform/modules/
 .terraform.lock.hcl
+
