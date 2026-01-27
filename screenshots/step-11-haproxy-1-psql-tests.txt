@@ -1,0 +1,10 @@
+ inet_server_addr | pg_is_in_recovery 
+------------------+-------------------
+ 10.20.20.83      | f
+(1 row)
+
+ inet_server_addr | pg_is_in_recovery 
+------------------+-------------------
+ 10.20.30.61      | t
+(1 row)
+
