@@ -1,3 +1,4 @@
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -127,23 +128,6 @@ resource "aws_security_group" "etcd" {
     protocol    = "tcp"
     cidr_blocks = [var.admin_cidr]
   }
-
-  ingress {
-    description     = "etcd client from Postgres nodes (Patroni) and etcd nodes"
-    from_port       = 2379
-    to_port         = 2379
-    protocol        = "tcp"
-    security_groups = [aws_security_group.postgres.id, aws_security_group.etcd.id]
-  }
-
-  ingress {
-    description     = "etcd peer from etcd nodes"
-    from_port       = 2380
-    to_port         = 2380
-    protocol        = "tcp"
-    security_groups = [aws_security_group.etcd.id]
-  }
-
   egress {
     description = "Allow all outbound"
     from_port   = 0
